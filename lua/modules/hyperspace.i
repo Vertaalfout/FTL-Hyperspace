@@ -137,6 +137,7 @@ namespace std {
     %template(vector_CrewDesc) vector<CrewDesc>;
     %template(vector_Fire) vector<Fire>;
     %template(vector_vector_Fire) vector<vector<Fire>>;
+    %template(vector_CrewPlacementDefinition) vector<CrewPlacementDefinition>;
     %template(vector_string) vector<string>;
 }
 
@@ -153,11 +154,19 @@ namespace std {
 
 %apply const std::string& {std::string* GetName()};
 
+%rename("Blueprints") Global_BlueprintManager_Blueprints; 
+%rename("Sounds") Global_SoundControl_Sounds;
+%rename("Animations") Global_AnimationControl_Animations;
+%rename("CrewFactory") Global_CrewMemberFactory_Factory;
 %rename("FPS") Global_CFPS_FPSControl;
 %rename("Score") Global_ScoreKeeper_Keeper;
 %rename("Resources") Global_ResourceControl_GlobalResources;
 %rename("Settings") Global_Settings_Settings;
 
+%immutable Global_BlueprintManager_Blueprints;
+%immutable Global_SoundControl_Sounds;
+%immutable Global_AnimationControl_Animations;
+%immutable Global_CrewMemberFactory_Factory;
 %immutable Global_CFPS_FPSControl;
 %immutable Global_ScoreKeeper_Keeper;
 %immutable Global_ResourceControl_GlobalResources;
@@ -200,6 +209,7 @@ public:
     BlueprintManager* GetBlueprints();
     SoundControl* GetSoundControl();
     AnimationControl *GetAnimationControl();
+    CrewMemberFactory *GetCrewFactory();
 
     static bool IsSeededRun();
     %immutable;
@@ -421,6 +431,8 @@ playerVariableType playerVariables;
 */
 %rename("%s") CApp::gui; // Maybe we only allow access to the command gui via WorldManager and just hide the CApp implementation by something that gives us access to WorldManager like below?
 %rename("%s") CApp::world;
+%immutable CApp::menu;
+%rename("%s") CApp::menu;
 // TODO: It might be nice to hide away CApp entirely for access to global things like `CommandGui` or `WorldManager` and hide other functions to do clicks & button presses & stuff under `input` as described above
 /* Potential example for a Hyperspace.world
 %luacode {
@@ -434,6 +446,22 @@ playerVariableType playerVariables;
     })
 }
 */
+
+%nodefaultctor MainMenu;
+%nodefaultdtor MainMenu;
+
+%rename("%s") MainMenu;
+%immutable MainMenu::bOpen;
+%rename("%s") MainMenu::bOpen;
+%immutable MainMenu::shipBuilder;
+%rename("%s") MainMenu::shipBuilder;
+
+%nodefaultctor ShipBuilder;
+%nodefaultdtor ShipBuilder;
+
+%rename("%s") ShipBuilder;
+%immutable ShipBuilder::bOpen;
+%rename("%s") ShipBuilder::bOpen;
 
 %nodefaultctor CommandGui;
 %nodefaultdtor CommandGui;
@@ -489,6 +517,12 @@ playerVariableType playerVariables;
 %immutable CommandGui::secretSector;
 %rename("%s") CommandGui::choiceBoxOpen;
 %immutable CommandGui::choiceBoxOpen;
+
+%nodefaultctor CombatControl;
+%nodefaultdtor CombatControl;
+%rename("%s") CombatControl;
+%rename("%s") CombatControl::boss_visual;
+%immutable CombatControl::boss_visual;
 
 %nodefaultctor Button;
 %nodefaultdtor Button;
@@ -606,6 +640,8 @@ playerVariableType playerVariables;
 // TODO: We might be able to allow access to the `sectors` vector and maybe allow rendering secret sectors onto the map but instead just jumping to them when they're clicked?
 ////%rename("%s") StarMap::sectors; // also there is lastSectors, not sure what they're for yet
 // TODO: Not sure what scrapCollected, dronesCollected, fuelCollected, weaponFound, droneFound maps do, does the game record what was found at each node? Can't find calls to it internally.
+%rename("%s") StarMap::ship;
+%rename("%s") StarMap::shipNoFuel;
 %immutable StarMap::worldLevel; //Sector number (Sector 1 has worldLevel = 0, Sector 2 has worldLevel = 1, etc.)
 %rename("%s") StarMap::worldLevel;
 
@@ -1246,7 +1282,7 @@ playerVariableType playerVariables;
 %rename("%s") ShipSystem::SetSelected;
 %rename("%s") ShipSystem::GetSelected;
 %rename("%s") ShipSystem::CompletelyDestroyed;
-%rename("%s") ShipSystem::GetName;
+//%rename("%s") ShipSystem::GetName; // crashes the game, use SystemIdToName instead
 %rename("%s") ShipSystem::SetName;
 %rename("%s") ShipSystem::Repair;
 %rename("%s") ShipSystem::PartialRepair;
@@ -2337,6 +2373,26 @@ playerVariableType playerVariables;
 %rename("%s") CrewAnimation::uniqueBool1;
 %rename("%s") CrewAnimation::uniqueBool2;
 
+%nodefaultctor CrewMemberFactory;
+%nodefaultdtor CrewMemberFactory;
+%rename("%s") CrewMemberFactory;
+
+%rename("%s") CrewMemberFactory::GetCloneReadyList;
+%extend CrewMemberFactory {
+   
+    //Overload for returning vector in lua, pass by reference still works but this simplifies things.
+    std::vector<CrewMember*> GetCloneReadyList(bool player)
+    {
+        std::vector<CrewMember*> ret;
+        $self->GetCloneReadyList(ret, player);
+        return ret;
+    }
+}
+
+
+%immutable CrewMemberFactory::crewMembers;
+%rename("%s") CrewMemberFactory::crewMembers;
+
 %rename("%s") Get_Projectile_Extend;
 %nodefaultctor Projectile_Extend;
 %nodefaultdtor Projectile_Extend;
@@ -2346,6 +2402,42 @@ playerVariableType playerVariables;
 %rename("%s") Projectile_Extend::name;
 %rename("%s") Projectile_Extend::customDamage;
 %rename("%s") Projectile_Extend::missedDrones; // list of selfId of drones that have dodged this projectile
+
+%rename("%s") CustomDamage;
+%rename("%S") CustomDamage::Clear;
+
+%rename("%s") CustomDamage::def;
+%rename("%s") CustomDamage::sourceShipId;
+%immutable CustomDamage::sourceShipId;
+%rename("%s") CustomDamage::accuracyMod;
+%rename("%s") CustomDamage::droneAccuracyMod;
+
+%rename("%s") CustomDamageDefinition;
+%rename("%s") CustomDamageDefinition::GiveId;
+
+%rename("%s") CustomDamageDefinition::idx;
+%immutable CustomDamageDefinition::idx;
+%rename("%s") CustomDamageDefinition::accuracyMod;
+%rename("%s") CustomDamageDefinition::droneAccuracyMod;
+%rename("%s") CustomDamageDefinition::noSysDamage;
+%rename("%s") CustomDamageDefinition::noPersDamage;
+%rename("%s") CustomDamageDefinition::ionBeamFix;
+%rename("%s") CustomDamageDefinition::statBoostChance;
+%rename("%s") CustomDamageDefinition::roomStatBoostChance;
+%rename("%s") CustomDamageDefinition::statBoosts;
+%immutable CustomDamageDefinition::statBoosts;
+%rename("%s") CustomDamageDefinition::roomStatBoosts;
+%immutable CustomDamageDefinition::roomStatBoosts;
+%rename("%s") CustomDamageDefinition::erosionChance;
+%rename("%s") CustomDamageDefinition::erosionEffect;
+%rename("%s") CustomDamageDefinition::crewSpawnChance;
+%rename("%s") CustomDamageDefinition::crewSpawns;
+%immutable CustomDamageDefinition::crewSpawns;
+
+//%rename("%s") CustomDamageDefinition::customDamageDefs;
+//%immutable CustomDamageDefinition::customDamageDefs;
+//%rename("%s") CustomDamageDefinition::defaultDef;
+//%immutable CustomDamageDefinition::defaultDef;
 
 %nodefaultctor LaserBlast;
 %rename("%s") LaserBlast;
