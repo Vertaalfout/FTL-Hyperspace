@@ -29,11 +29,11 @@ Be sure to write a description which explains the changes you made.
 
 # Adding to the Wiki
 
-All the files which make up the wiki are held in `FTL-Hyperspace/wiki`. Right now the LUA documentation is severely lacking, specifically the `Hyperspace` module page (`Lua-Hyperspace-Module.md`), which should have detail you can access through the `Hyperspace` module. The `Defines` and `Graphics` module pages (`Lua-Defines-module.md` and `Lua-Graphics-Module.md`, respectively) are also missing a number of events which can be hooked with callback functions. This section explains how to read the source code files relevant to these pages so you that they can be expanded.
+All the files which make up the wiki are held in `FTL-Hyperspace/wiki`. Right now the LUA documentation is severely lacking, specifically the `Hyperspace` module page (`Lua-Hyperspace-Module.md`), which should cover everything you can access through the `Hyperspace` module. The `Defines` module page (`Lua-Defines-module.md`) is also missing a number of events which can be hooked with callback functions. This section explains how to read the source code files relevant to these pages so you that they can be expanded.
 
 ## LUA Hyperspace Module
 
-The [`hyperspace.i`](../../blob/master/lua/modules/hyperspace.i) source file contains everything that is exposed to the `Hyperspace` module. For example, here's the section which exposes `ShipManager`:
+The [`hyperspace.i`](../blob/master/lua/modules/hyperspace.i) source file contains everything that is exposed to the `Hyperspace` module. For example, here's the section which exposes `ShipManager`:
 
 ```c
 %rename("%s") ShipManager;
@@ -49,7 +49,7 @@ If you want to document a class like `ShipManager`, first find where it's expose
 %rename("%s") ShipManager::DamageArea;
 ```
 
-In order to get more information, we need to find these in the [`FTLGameWin32.h`](../../blob/master/FTLGameWin32.h) file. First, find where `ShipManager` is defined.
+In order to get more information, we need to find these in the [`FTLGameWin32.h`](../blob/master/FTLGameWin32.h) file. First, find where `ShipManager` is defined.
 
 ```c
 struct ShipManager : ShipObject
@@ -64,7 +64,7 @@ LIBZHL_API bool DamageArea(Pointf location, Damage dmg, bool forceHit);
 bool bDestroyed;
 ```
 
-Now that we know what type `bDestroyed` has, as well as which type `DamageArea` returns as well as all the arguments it takes, we can document them in the .md markdown file and, if necessary, we can add some additional info.
+Now that we know what type `bDestroyed` has, as well as which type `DamageArea` returns and all the arguments it takes, we can document them in the .md markdown file and, if necessary, add some additional info.
 
 - `bool :DamageArea(Pointf location, DamageParameter dmg, bool force)`
    - I think this causes damage to a area like when a projectile hits but it's not tested yet, could possibly be used for bursts?
@@ -74,8 +74,8 @@ Now that we know what type `bDestroyed` has, as well as which type `DamageArea` 
 
 - `bool` `.bDestroyed`
 
-If you think a member or method needs additional info, you can open the console in-game with the `\` key and use the `LUA` command to execute arbitrary LUA code and check exactly how something works.
+If you think a member or method needs additional info, you can open the console in-game with the `\` key and use the `LUA` command to execute arbitrary LUA code to check exactly how something works.
 
-## Defines and Graphics Modules
+## LUA Defines Module
 
-The hookable events for the Defines module are in the [`InternalEvents.i`](../../blob/master/lua/InternalEvents.h) source file, and the events for the Graphics module are in the [`RenderEvents.i`](../../blob/master/lua/RenderEvents.h) source file. Information on these events already exist as comments in the code itself, the information only needs to be moved to the appropriate tables inside the wiki pages. Refer to the "Render Events" section in the `Defines` module page for proper formatting.
+The hookable events for the `Defines` module are in the [`InternalEvents.i`](../blob/master/lua/InternalEvents.h) source file, and the events for the `Graphics` module are in the [`RenderEvents.i`](../blob/master/lua/RenderEvents.h) source file. Information on these events already exist as comments in the code itself, the information only needs to be moved to the appropriate tables inside the `Defines` module wiki page.
